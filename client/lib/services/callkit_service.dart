@@ -44,7 +44,7 @@ class CallKitService {
       return;
     }
 
-    final uuid = const Uuid().v4();
+    final uuid = data['uuid'] ?? const Uuid().v4();
     final senderName = data['sender'] ?? 'Unknown Caller';
 
     // Create CallKit params

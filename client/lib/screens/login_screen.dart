@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/signaling_service.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +23,55 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           '/home',
           arguments: _controller.text,
+        );
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkCallKitEvents();
+  }
+
+  Future<void> _checkCallKitEvents() async {
+    try {
+      var calls = await FlutterCallkitIncoming.activeCalls();
+      if (calls is List && calls.isNotEmpty) {
+        print("Found active call on startup: ${calls.first}");
+        // If there is an active call, we can assume the user wants to be in it.
+        // The payload is in 'extra'.
+        _handleCallAccept(Map<String, dynamic>.from(calls.first));
+
+        // Also clear the system notification now that we are handling it
+        // (Or we leave it until we are in CallScreen? CallScreen disposes it).
+      }
+    } catch (e) {
+      print("Error checking CallKit events: $e");
+    }
+  }
+
+  void _handleCallAccept(Map<String, dynamic> body) {
+    if (body['extra'] == null) return;
+    final data = Map<String, dynamic>.from(body['extra']);
+    final selfId = data['target']; // The one who was called (us)
+
+    if (selfId != null) {
+      print("Auto-logging in and answering call for $selfId");
+      _controller.text = selfId; // Fill UI
+
+      _signalingService.connect();
+      // Wait for connection then navigate
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _signalingService.login(selfId);
+
+        Navigator.pushReplacementNamed(
+          context,
+          '/call',
+          arguments: {
+            'selfId': selfId,
+            'offer': data, // Pass the offer so we can answer immediately
+          },
         );
       });
     }

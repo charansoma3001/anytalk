@@ -97,11 +97,16 @@ io.on("connection", (socket) => {
     // Note: target is now USERNAME, not socketId
     const targetUser = users.get(payload.target);
 
+    // Generate a valid Unique ID for this call session
+    // We send this same ID to both Socket and FCM so the client can deduplicate
+    const callUuid = require('uuid').v4();
+
     if (targetUser) {
       // 1. Try to send via Socket if online
       if (targetUser.online && targetUser.socketId) {
         io.to(targetUser.socketId).emit("offer", {
           ...payload,
+          uuid: callUuid, // Include server-generated UUID
           sender: currentUsername, // Send username as sender
         });
       }
@@ -111,9 +116,6 @@ io.on("connection", (socket) => {
       if (targetUser.fcmToken && admin) {
         console.log(`Sending Push Notification to ${payload.target}`);
         try {
-          // Generate a valid UUID for the call (CallKit requires this)
-          const callUuid = require('uuid').v4();
-
           await admin.messaging().send({
             token: targetUser.fcmToken,
             data: {
@@ -122,7 +124,7 @@ io.on("connection", (socket) => {
               sender: currentUsername || "Unknown",
               sdp: typeof payload.sdp === 'string' ? payload.sdp : JSON.stringify(payload.sdp),
               type_val: payload.type || 'offer',
-              uuid: callUuid, // USE VALID UUID!
+              uuid: callUuid, // USE THE SAME UUID!
               nameCaller: currentUsername || "Unknown",
               appName: "AnyTalk",
               handle: currentUsername || "Unknown",
