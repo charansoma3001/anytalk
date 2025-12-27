@@ -53,14 +53,15 @@ class SignalingService {
   String? get socketId => _socket.id;
 
   void connect() {
-    // Basic host selection for convenience
-    // Android Emulator: 10.0.2.2
-    // iOS Simulator / macOS: localhost
-    // Real Device: Need actual IP
-    String baseUrl = 'http://localhost:3000';
-    if (!kIsWeb && Platform.isAndroid) {
-      baseUrl = 'http://10.0.2.2:3000';
-    }
+    // Production URL (Render)
+    String baseUrl = 'https://anytalk.onrender.com';
+
+    // Uncomment to use local dev logic
+    // if (!kIsWeb && Platform.isAndroid) {
+    //   baseUrl = 'http://10.0.2.2:3000';
+    // } else if (kDebugMode) {
+    //   baseUrl = 'http://localhost:3000';
+    // }
 
     // Secure Auth Token (In prod this should be secure)
     const String authToken = "secret_anytalk_key_12345";

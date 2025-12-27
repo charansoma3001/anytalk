@@ -26,14 +26,26 @@ io.use((socket, next) => {
 // Initialize Firebase Admin
 let admin;
 try {
-  const serviceAccount = require("./serviceAccountKey.json");
-  admin = require("firebase-admin");
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
-  console.log("Firebase Admin Initialized");
+  const fs = require('fs');
+  // Check for Render secret file path first, then local
+  const renderPath = "/etc/secrets/serviceAccountKey.json";
+  const localPath = "./serviceAccountKey.json";
+
+  const serviceAccountPath = fs.existsSync(renderPath) ? renderPath : localPath;
+
+  if (fs.existsSync(serviceAccountPath)) {
+    const serviceAccount = require(serviceAccountPath);
+    admin = require("firebase-admin");
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log(`Firebase Admin Initialized (using ${serviceAccountPath})`);
+  } else {
+    console.warn("Service Account Key not found at /etc/secrets/ or ./");
+  }
+
 } catch (e) {
-  console.warn("Firebase Admin Initialization Failed (Missing serviceAccountKey.json?):", e.message);
+  console.warn("Firebase Admin Initialization Failed:", e.message);
 }
 
 // Track persistent users: { username: { socketId, fcmToken, online } }
