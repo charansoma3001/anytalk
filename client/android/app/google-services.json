@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "230704479702",
+    "project_id": "anytalk-0",
+    "storage_bucket": "anytalk-0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230704479702:android:94de0f2bc394dc34b6b877",
+        "android_client_info": {
+          "package_name": "com.anytalk.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDErZI6-IwUPvZMXp8vSSFb_5222a3Eqvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
